@@ -1,0 +1,16 @@
+# @package _group_
+deterministic: false
+max_epochs: 100
+min_epochs: 1
+resume_from_checkpoint: null
+
+# Run validation every epoch so logs show eval trends.
+check_val_every_n_epoch: 1
+
+# Keep startup fast (step3 entry also forces this to 0).
+num_sanity_val_steps: 1
+
+# Lightweight smoke-eval: only run a few val/test batches.
+# Override by setting a different TRAINER_CONFIG.
+limit_val_batches: 20
+limit_test_batches: 20

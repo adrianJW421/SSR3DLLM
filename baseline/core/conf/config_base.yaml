@@ -1,0 +1,73 @@
+general:
+  train_mode: true
+  task: "instance_segmentation"
+  seed: 1
+  checkpoint: null
+  train_on_segments: true
+  eval_on_segments: true
+  save_visualizations: false
+  visualization_point_size: 20
+  decoder_id: -1
+  export: false
+  use_dbscan: false
+  ignore_class_threshold: 100
+  project_name: scannet
+  experiment_name: xxx
+  num_targets: 199
+  dbscan_eps: 0.95
+  dbscan_min_points: 1
+  llm_config: baseline/core/conf/llm/nollm.json
+  llm_data_config: baseline/core/conf/llm/det10.json
+
+  filter_scene00: False
+
+  topk_per_image: 100
+
+  # Rel3D-LLM: whether LLM consumes relation histograms (rel3d_hist) from Mask3DLang.
+  # Default false to keep behavior identical to original Grounded 3D-LLM.
+  use_gt_proposals_for_llm: false
+  use_rel3d_hist_for_llm: false
+  # Rel3D-LLM: weights for global / anchor-aware relation fields when enhancing
+  # instance features passed to LLM / role heads. defaults match the current Step-2C setup.
+  # override via CLI in Step-2C+ (e.g., set rel3d_anchor_weight=0 to use only the global field).
+  rel3d_global_weight: 1.0
+  rel3d_anchor_weight: 1.0
+  # Rel3D-LLM: optional auxiliary losses for relation-aware training
+  # disabled by default to preserve baseline behavior; enable only for Rel3D Step-2/3 experiments.
+  enable_rel3d_role_loss: false
+  rel3d_role_loss_weight: 0.0
+  enable_rel3d_teacher: false
+  rel3d_teacher_loss_weight: 0.0
+
+  save_dir: saved/${general.experiment_name}
+  # time/commit/md5(config)_uuid
+  # time/experiment_id/version_uuid
+  experiment_id: debug # commit[:8], or unique from logger
+  version: 1 # md5[:8] of config
+
+  gpus: 1
+
+  timestamp: null
+
+defaults:
+  - data: indoor
+  - data/data_loaders: simple_loader
+  - data/datasets: scannet200
+  - data/collation_functions: voxelize_collate
+  - logging: offline
+  - model: mask3d
+  - metrics: miou
+  - optimizer: adamw
+  - scheduler: onecyclelr
+  - trainer: trainer600
+  - callbacks: callbacks_instance_segmentation
+  - matcher: hungarian_matcher
+  - loss: set_criterion
+  
+hydra:
+  run:
+    dir: saved/hydra_logs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: saved/hydra_logs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    # dir: ${general.save_dir}
+    # subdir: ${hydra.job.num}_${hydra.job.id}

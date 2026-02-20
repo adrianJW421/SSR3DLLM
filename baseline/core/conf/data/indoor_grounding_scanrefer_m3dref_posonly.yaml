@@ -1,0 +1,39 @@
+# @package _group_
+
+# Grounding-only SFT mix for SSR3DLLM Step4-v3 (ScanRefer + M3DRef) with POSITIVE-ONLY sampling.
+#
+# Motivation:
+# - The default `positive_lang_query_ratio<1` adds "negative" grounding entries by sampling
+#   utterances from other scenes with empty `gt_insts`. Those entries do not have
+#   `target_gt_id` and will be skipped by the strict ScanRefer/M3DRef single-step pipeline,
+#   resulting in near-zero effective training signal.
+#
+# This config sets `positive_lang_query_ratio=1.0` to disable negative sampling.
+
+train_mode: train
+validation_mode: validation
+test_mode: validation
+
+ignore_label: 255
+add_raw_coordinates: true
+add_colors: true
+add_normals: false
+in_channels: 3
+num_labels: 200
+task: ${general.task}
+
+pin_memory: false
+num_workers: 4
+batch_size: 5
+test_batch_size: 1
+
+voxel_size: 0.02
+
+sample_class_labels: true
+lang_data_conf: scanrefer+m3dref
+lang_query: 20
+num_concat_texts: 2
+lang_max_token_length: 256
+positive_lang_query_ratio: 1.0
+rel3d_max_per_scene: 8
+

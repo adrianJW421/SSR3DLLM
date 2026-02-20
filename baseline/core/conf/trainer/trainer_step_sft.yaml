@@ -1,0 +1,13 @@
+# @package _group_
+
+# Trainer config for step-token SFT experiments:
+# - Run validation every epoch (for clear epoch-by-epoch step metrics)
+# - Disable sanity check to reduce startup cost
+
+deterministic: false
+max_epochs: 50
+min_epochs: 1
+resume_from_checkpoint: null
+check_val_every_n_epoch: 1
+num_sanity_val_steps: 0
+

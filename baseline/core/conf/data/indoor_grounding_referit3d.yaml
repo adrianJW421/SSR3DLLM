@@ -1,0 +1,33 @@
+# @package _group_
+
+# Grounding-only finetune mix for ReferIt3D baseline:
+# - Use ReferIt3D (Nr3D+Sr3D) utterances as additional grounding supervision.
+# - Disable ScanRefer by adding `noscanrefer` (required by dataset assertions).
+
+train_mode: train
+validation_mode: validation
+test_mode: validation
+
+ignore_label: 255
+add_raw_coordinates: true
+add_colors: true
+add_normals: false
+in_channels: 3
+num_labels: 200
+task: ${general.task}
+
+pin_memory: false
+num_workers: 4
+batch_size: 5
+test_batch_size: 1
+
+voxel_size: 0.02
+
+sample_class_labels: true
+lang_data_conf: noscanrefer+referit3d
+lang_query: 20
+num_concat_texts: 2
+lang_max_token_length: 256
+positive_lang_query_ratio: 0.9
+rel3d_max_per_scene: 8
+

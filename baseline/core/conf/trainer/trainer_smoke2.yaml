@@ -1,0 +1,24 @@
+# @package _group_
+# Super-fast smoke config:
+# - a few train batches per epoch
+# - a few val/test batches per epoch (so rel3dref eval is non-empty)
+# - validate every epoch
+deterministic: false
+
+# Keep it short; override by setting a different TRAINER_CONFIG.
+max_epochs: 1
+min_epochs: 1
+resume_from_checkpoint: null
+
+check_val_every_n_epoch: 1
+# Run 1 sanity val step to catch val-time crashes early.
+num_sanity_val_steps: 1
+
+# 2 train steps (requested) to sanity-check the pipeline quickly.
+limit_train_batches: 2
+# Use more than 1 validation batch; rel3dref metrics can be 0 by chance if too few samples.
+limit_val_batches: 10
+limit_test_batches: 2
+
+# Make logs appear immediately.
+log_every_n_steps: 1

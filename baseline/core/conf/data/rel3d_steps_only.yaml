@@ -1,0 +1,44 @@
+# @package _group_
+
+# Minimal language setup for "rel3dref step-token" SFT:
+# - Do NOT load ScanRefer/M3DRef/etc. (avoid <ref> supervision)
+# - Only rely on rel3dref samples injected via REL3D_REL_JSON_PATH(_TRAIN/_EVAL)
+#
+# NOTE:
+# `dataset_code/semseg.py` requires `scanrefer` or `noscanrefer` to be present in
+# `lang_data_conf`. We use `noscanrefer` to satisfy the assertion while keeping
+# the built-in lang sources empty.
+
+train_mode: train
+validation_mode: validation
+test_mode: validation
+
+ignore_label: 255
+add_raw_coordinates: true
+add_colors: true
+add_normals: false
+in_channels: 3
+num_labels: 200
+task: ${general.task}
+
+pin_memory: false
+num_workers: 4
+batch_size: 5
+test_batch_size: 1
+
+voxel_size: 0.02
+
+sample_class_labels: true
+
+# Disable built-in language sources; keep only rel3dref relation QA.
+lang_data_conf: noscanrefer
+
+# Must be >0 to enable relation QA injection in Semseg.__getitem__.
+lang_query: 8
+# Disable detection concatenation; only keep rel3dref samples.
+num_concat_texts: 0
+lang_max_token_length: 256
+positive_lang_query_ratio: 1.0
+
+# Keep more relation samples per scene for step-token supervision.
+rel3d_max_per_scene: 16

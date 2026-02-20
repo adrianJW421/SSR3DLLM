@@ -1,0 +1,33 @@
+# @package _group_
+
+# Grounding-only SFT mix for SSR3DLLM Step4-v3:
+# - Keep only ScanRefer + M3DRef grounding samples from the built-in language sources.
+# - Still allow rel3dref replay via `REL3D_REL_JSON_PATH_{TRAIN,EVAL}` (injected by Semseg).
+
+train_mode: train
+validation_mode: validation
+test_mode: validation
+
+ignore_label: 255
+add_raw_coordinates: true
+add_colors: true
+add_normals: false
+in_channels: 3
+num_labels: 200
+task: ${general.task}
+
+pin_memory: false
+num_workers: 4
+batch_size: 5
+test_batch_size: 1
+
+voxel_size: 0.02
+
+sample_class_labels: true
+lang_data_conf: scanrefer+m3dref
+lang_query: 20
+num_concat_texts: 2
+lang_max_token_length: 256
+positive_lang_query_ratio: 0.9
+rel3d_max_per_scene: 8
+

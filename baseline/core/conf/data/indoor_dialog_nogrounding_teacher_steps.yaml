@@ -1,0 +1,42 @@
+# @package _group_
+
+# Step3 (language-only grounding):
+# - Keep Step3 dialog/multi-task language sources (scanqa/objdesc/...)
+# - Remove grounding datasets that require target boxes (<ref>): ScanRefer / Multi3DRef
+# - Add ReferIt3D "referential order" supervision (ViGOR-format) via Rel3D relation QA injection
+#   (controlled by env: REL3D_ENABLE_RELATION_QA + REL3D_REL_JSON_PATH_{TRAIN,EVAL})
+#
+# Notes:
+# - `dataset_code/semseg.py` requires `scanrefer` OR `noscanrefer` to appear in `lang_data_conf`.
+#   We use `noscanrefer` to satisfy the check while ensuring ScanRefer is not loaded.
+
+train_mode: train
+validation_mode: validation
+test_mode: validation
+
+ignore_label: 255
+add_raw_coordinates: true
+add_colors: true
+add_normals: false
+in_channels: 3
+num_labels: 200
+task: ${general.task}
+
+pin_memory: false
+num_workers: 4
+batch_size: 5
+test_batch_size: 1
+
+voxel_size: 0.02
+
+sample_class_labels: false
+
+# Keep original Step3 non-grounding sources, but drop ScanRefer/M3DRef.
+lang_data_conf: noscanrefer+scanqa,20+objdesc,10+scenedesc,0+scan2cap,20+3dllm,10+alpaca,10+embodieddialog,10+embodiedplan,5+globalscenecap,5
+lang_query: 100
+num_concat_texts: 2
+lang_max_token_length: 256
+positive_lang_query_ratio: 0.9
+
+# Use more relation samples per scene for listener-chain generation supervision.
+rel3d_max_per_scene: 16

@@ -1,0 +1,10 @@
+# @package _group_
+# Log training with Weights & Biases only.
+# Do not hard-code entity here; prefer WANDB_ENTITY env var or local wandb config.
+- _target_: pytorch_lightning.loggers.WandbLogger
+  project: ${general.project_name}
+  name: ${general.experiment_name}
+  save_dir: ${general.save_dir}
+  resume: "allow"
+  id: ${general.experiment_name}
+
