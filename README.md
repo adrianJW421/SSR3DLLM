@@ -39,8 +39,19 @@ fine-grained grounding (including the 50.3/51.9 settings) while keeping broad la
 ## Release Scope
 
 - [x] Released: evaluation/inference code and reproduction scripts.
-- [x] Released: evaluation-related checkpoints and evaluation datasets (distributed via external download links in `data/README.md`).
+- [x] Released: anonymous-phase minimal assets via external download links in `data/README.md`.
 - [ ] TODO: full training code release and full training-data release.
+
+## Anonymous Asset Strategy
+
+To keep the anonymous storage footprint manageable, this release separates assets into three buckets:
+
+- Project-owned assets: hosted by us (single Figshare bundle link in `data/README.md`).
+- Third-party assets: downloaded from their official sources (ScanNet/LLM/BERT).
+- Visual frontend caches: `MASK3D_FEATS_*` are included in the same Figshare bundle as zipped assets; local regeneration is optional via `scripts/run_export_mask3d_features.sh`.
+
+Anonymous review bundle link (project-owned assets):
+`https://figshare.com/s/b4f92c34ceda0b17626d`
 
 ## Repository Usage
 
@@ -49,7 +60,7 @@ fine-grained grounding (including the 50.3/51.9 settings) while keeping broad la
 - `scripts/`: release entry scripts (primarily eval/demo)
 - `configs/`: path config templates and environment-specific overrides
 - `data/`: placeholder-only asset scaffold (no real datasets/weights committed)
-- `tools/`: eval helpers used by release scripts (checkpoint adaptation and result extraction)
+- `tools/`: eval and preprocessing helpers used by release scripts
 - `docs/`: usage and reproduction docs for this release package
 - `baseline/`: hydra-free baseline pipeline used by release scripts
 - `main_run.py`: unified Python launcher (`--entry standard|interface`)
@@ -75,6 +86,19 @@ bash scripts/run_eval_appendix_examples.sh
 bash scripts/run_eval_dialog_demo.sh
 ```
 
+#### 3) (Optional fallback) Regenerate visual frontend caches locally
+
+The Figshare bundle already provides zipped `MASK3D_FEATS_*`.
+If you cannot use those zip files in your environment, generate them locally:
+
+```bash
+# validation / test side features
+bash scripts/run_export_mask3d_features.sh validation
+
+# train side features (for ReferIt3D suite requiring train feature root)
+bash scripts/run_export_mask3d_features.sh train
+```
+
 ### Data Policy
 
 This repo does not ship datasets or model weights.
@@ -90,6 +114,7 @@ Use the placeholder structure under `data/` and fill assets locally.
 - `scripts/run_eval_unified.sh`: unified entry for repro/ask workflows
 - `scripts/run_eval_stepslot_varlen.sh`: evaluate varlen one-pass chain
 - `scripts/run_eval_referit3d_suite.sh`: evaluate ReferIt3D suite
+- `scripts/run_export_mask3d_features.sh`: export `MASK3D_FEATS_*` from a Step-2 ckpt
 
 ### Docs Index
 

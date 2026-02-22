@@ -12,7 +12,8 @@ These aliases call the original scripts internally, so old commands still work.
 | Unified eval/ask entry | `scripts/run_eval_unified.sh` | `scripts/eval_ssr3dllm_unified.sh` |
 | Eval step-slot varlen chain | `scripts/run_eval_stepslot_varlen.sh` | `scripts/eval_llama_stepslot_varlen_chain_onepass_pred.sh` |
 | Eval ReferIt3D suite | `scripts/run_eval_referit3d_suite.sh` | `scripts/eval_llama_stepslot_referit3d_suite.sh` |
+| Export Mask3D features | `scripts/run_export_mask3d_features.sh` | `scripts/export_mask3d_feats_predbox_fullresfix.sh` |
 
 ## Compatibility
 
-- This release keeps eval/demo aliases only.
+- This release keeps eval/demo aliases plus one optional local cache-export alias.

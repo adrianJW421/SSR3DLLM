@@ -18,6 +18,7 @@ This directory is intended to be published as the **public GitHub repository** r
 - Public-facing scripts under `scripts/` (evaluation-focused):
   - `run_eval_appendix_examples.sh`, `run_eval_dialog_demo.sh`, `run_eval_unified.sh`
   - `run_eval_stepslot_varlen.sh`, `run_eval_referit3d_suite.sh`
+  - `run_export_mask3d_features.sh` (optional local cache rebuild)
   - `eval_llm.sh` (metric helper used by appendix protocol)
 
 ## Not included

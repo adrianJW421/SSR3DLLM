@@ -1,56 +1,98 @@
 # Data Setup (Evaluation Release)
 
-This release is evaluation-focused.
-`data/` contains placeholders only. Do not commit real datasets or checkpoints.
+`data/` is placeholder-only in this repository.
+Do not commit real datasets or checkpoints.
 
-## Current Release Scope
+## Release Policy (Anonymous Phase)
 
-- Released: evaluation/inference code
-- Released: evaluation checkpoints and evaluation datasets (download externally)
-- Not released yet: full training code/data pipeline
+To fit anonymous storage limits, assets are split into:
 
-## Required for Evaluation
+1. Hosted by us (Figshare): project-owned checkpoints and small protocol files.
+2. Downloaded from official sources: third-party datasets and base language models.
+3. Optional fallback: rebuild visual frontend cache (`MASK3D_FEATS_*`) from Step-2 ckpt.
 
-Fill these paths (via `configs/paths.sh`) to run the public eval/demo scripts:
+## A. Hosted by Us (Figshare)
 
-| Path | What it should contain | Download link |
+Single anonymous-review bundle link (contains all project-owned assets in this section):
+
+`https://figshare.com/s/b4f92c34ceda0b17626d`
+
+Note: this is a private review link and may have an expiry date.
+
+| Path | Purpose | Size (approx) |
+|---|---|---:|
+| `data/SSR3DLLM_CKPT/SSR3DLLM.ckpt` | Packed one-file SSR3DLLM checkpoint | 8.4 GB |
+| `data/grounded3dllm_ckpts/step3/last-epoch.ckpt` | Baseline Step-3 checkpoint (for baseline-vs-ours eval) | 3.4 GB |
+| `data/grounded3dllm_ckpts/step2/last-epoch.ckpt` | Step-2 checkpoint (for local feature export) | 2.2 GB |
+| `data/LISTENER_INIT_CKPT_BERT/best_model.pth` | Listener init ckpt for ReferIt3D suite | 1.1 GB |
+| `data/NR3D_TRAIN_CSV/` | NR3D train/test CSV pair used by release scripts | 0.1 GB |
+| `data/SR3D_TRAIN_CSV/` | SR3D train/test CSV pair used by release scripts | 0.1 GB |
+| `data/MASK3D_FEATS_TRAIN` (zip) | Pre-exported train feature shards | 0.07 GB |
+| `data/MASK3D_FEATS_TEST` (zip) | Pre-exported validation/test feature shards | 0.02 GB |
+| `data/MASK3D_FEATS_TRAIN_predbox_qnorm` (zip) | Optional qnorm train feature variant | 0.13 GB |
+| `data/MASK3D_FEATS_TEST_predbox_qnorm` (zip) | Optional qnorm validation/test feature variant | 0.03 GB |
+
+## B. Download from Official Sources
+
+| Path | What it contains | Official source link |
 |---|---|---|
 | `data/SCANNET200_ROOT/` | Processed ScanNet200 root (`train/`, `validation/`, `instance_gt/`, `*_database.yaml`) |  |
 | `data/rawscannet/scans/` | Raw ScanNet `scans/` (axis-alignment txt files) |  |
-| `data/REFERIT_SCANNET_FILE/keep_all_points_with_global_scan_alignment.pkl` | ReferIt3D ScanNet metadata pkl |  |
-| `data/grounded3dllm_ckpts/step3/last-epoch.ckpt` | Baseline Step-3 checkpoint for comparison |  |
-| `data/SSR3DLLM_CKPT/SSR3DLLM.ckpt` | Packed SSR3DLLM checkpoint |  |
 | `data/BERT_PATH/bert-base-uncased/` | BERT weights (HF format) |  |
 | `data/LLM_PATH/Tiny-Vicuna-1B/` | LLM weights (HF format) |  |
-| `data/LISTENER_INIT_CKPT_BERT/best_model.pth` | Listener init checkpoint |  |
-| `data/NR3D_TRAIN_CSV/` | ReferIt3D CSVs used by eval scripts |  |
-| `data/SR3D_TRAIN_CSV/` | ReferIt3D CSVs used by eval scripts |  |
-| `data/MASK3D_FEATS_TRAIN/` | Pre-exported train feature shards (`*.pt`) |  |
-| `data/MASK3D_FEATS_TEST/` | Pre-exported val/test feature shards (`*.pt`) |  |
+| `data/REFERIT_SCANNET_FILE/keep_all_points_with_global_scan_alignment.pkl` | ReferIt3D ScanNet metadata pkl (needed by ReferIt3D suite) |  |
 
-## Optional (Not Needed for Main Eval)
+## C. Rebuild Locally (Optional Fallback)
+
+The Figshare bundle already contains zipped `MASK3D_FEATS_*`.
+If download is unavailable in your environment, generate them locally:
+
+```bash
+# validation side
+bash scripts/run_export_mask3d_features.sh validation
+
+# train side
+bash scripts/run_export_mask3d_features.sh train
+```
+
+Then set in `configs/paths.sh`:
+
+- `MASK3D_FEATS_TEST=<your validation export dir>`
+- `MASK3D_FEATS_TRAIN=<your train export dir>`
+
+## D. If You Download Feature ZIPs: Expected Extraction Paths
+
+If you use the four feature zip files from the Figshare bundle, extract them to:
+
+- `data/MASK3D_FEATS_TRAIN/`
+- `data/MASK3D_FEATS_TEST/`
+- `data/MASK3D_FEATS_TRAIN_predbox_qnorm/` (optional)
+- `data/MASK3D_FEATS_TEST_predbox_qnorm/` (optional)
+
+Example:
+
+```bash
+cd <repo-root>/data
+unzip MASK3D_FEATS_TRAIN.zip -d .
+unzip MASK3D_FEATS_TEST.zip -d .
+# optional qnorm
+unzip MASK3D_FEATS_TRAIN_predbox_qnorm.zip -d .
+unzip MASK3D_FEATS_TEST_predbox_qnorm.zip -d .
+```
+
+After extraction, make sure `configs/paths.sh` points to the extracted directories.
+
+## Optional Paths (Not Needed for Main Demo)
 
 | Path | Use case |
 |---|---|
-| `data/grounded3dllm_ckpts/step2/last-epoch.ckpt` | Only if you want to re-export Mask3D features locally |
 | `data/LLAMA_STEPSLOT_EVAL_CKPT/` | Optional extra eval profile |
 | `data/LLAMA_STEPSLOT_EVAL_CKPT_UB/` | Optional UB profile |
-| `data/MASK3D_FEATS_TRAIN_predbox_qnorm/`, `data/MASK3D_FEATS_TEST_predbox_qnorm/` | Optional qnorm ablation assets |
+| `data/MASK3D_FEATS_TRAIN_predbox_qnorm/`, `data/MASK3D_FEATS_TEST_predbox_qnorm/` | Optional qnorm ablation assets (also included as zip in the bundle) |
 | `data/langdata/` | Optional local language payloads for custom experiments |
-| `data/processed/` | Legacy compatibility symlink path only |
+| `data/processed/` | Legacy compatibility path only |
 
-## Clarification on Potentially Confusing Paths
-
-- The legacy `data/STEP2_CKPT/` path is intentionally not used in this release.
-  Use `data/grounded3dllm_ckpts/step2/` if you need a Step-2 ckpt for local feature export.
-- `data/processed/` is a legacy compatibility location (often a symlink target).
-  It is not required for the main eval path.
-- `LLAMA_STEPSLOT_EVAL_CKPT_519` remains as a compatibility env var, but in this release
-  it points to the same UB checkpoint path by default.
-- `data/rawscannet/` is **not** duplicated with `data/SCANNET200_ROOT/`.
-  `rawscannet` provides raw scan metadata (axis alignment), while `SCANNET200_ROOT` is processed data for model/eval.
-
-## Check
+## Quick Path Check
 
 ```bash
 bash scripts/check_paths.sh
