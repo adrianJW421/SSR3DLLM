@@ -160,7 +160,15 @@ bash scripts/run_eval_dialog_demo.sh
 
 # ReferIt3D suite
 bash scripts/run_eval_referit3d_suite.sh
+
+# ScanRefer / Multi3DRef grounding metrics
+bash scripts/run_eval_scanrefer_multi3dref.sh
+
+# SSR3D-LLM grounding-readout throughput
+bash scripts/run_benchmark_readout.sh
 ```
+
+Set `SCANREFER_DINO_SAMPLE_CACHE_ROOT` or `MULTI3DREF_DINO_SAMPLE_CACHE_ROOT` in `configs/paths.sh` to enable optional DINO appearance fusion during ScanRefer/Multi3DRef evaluation.
 
 #### 3) Optional: regenerate proposal-level visual features
 
@@ -190,6 +198,8 @@ Use the placeholder structure under `data/` and fill assets locally.
 - `scripts/run_eval_unified.sh`: unified entry for reproduction and ask-mode workflows
 - `scripts/run_eval_stepslot_varlen.sh`: latent-step variable-length evaluation helper
 - `scripts/run_eval_referit3d_suite.sh`: ReferIt3D evaluation suite
+- `scripts/run_eval_scanrefer_multi3dref.sh`: ScanRefer and Multi3DRef SSR3D-LLM metric evaluation
+- `scripts/run_benchmark_readout.sh`: SSR3D-LLM grounding-readout throughput benchmark
 - `scripts/run_export_mask3d_features.sh`: export proposal-level Mask3D features from a Step-2 checkpoint
 
 ## Docs Index

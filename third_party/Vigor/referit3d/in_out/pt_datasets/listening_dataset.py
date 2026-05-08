@@ -33,6 +33,8 @@ class ListeningDataset(Dataset):
             raise ValueError
 
         self.mask3d_feature_root = Path(mask3d_feature_root) if mask3d_feature_root else None
+        dino_cache_root = str(os.environ.get("VIGOR_MASK3D_DINO_SAMPLE_CACHE_ROOT", "")).strip()
+        self.mask3d_dino_sample_cache_root = Path(dino_cache_root) if dino_cache_root else None
         self._mask3d_scene_cache: dict[str, dict | None] = {}
 
         # Original Vigor uses BUTD/PCNet object classification results to build
@@ -85,6 +87,39 @@ class ListeningDataset(Dataset):
             feat = None
         self._mask3d_scene_cache[scan_id] = feat
         return feat
+
+    @staticmethod
+    def _normalize_query_map(raw_map, source: str) -> dict[int, int]:
+        if raw_map is None:
+            return {}
+        if not isinstance(raw_map, dict):
+            raise TypeError(f"gt_to_query_map must be a dict in {source}, got {type(raw_map)}")
+        return {int(k): int(v) for k, v in raw_map.items()}
+
+    def _sample_cache_relpath_from_row(self, ref, scan_id: str) -> Path:
+        rel = None
+        if "mask3d_sample_cache_relpath" in ref:
+            rel = ref["mask3d_sample_cache_relpath"]
+        if (rel is None or (isinstance(rel, float) and np.isnan(rel)) or str(rel).strip() == "") and "mask3d_sample_cache_path" in ref:
+            rel = ref["mask3d_sample_cache_path"]
+        if rel is None or (isinstance(rel, float) and np.isnan(rel)) or str(rel).strip() == "":
+            raise RuntimeError(f"sample-level cache root is set but row for scene {scan_id} has no sample cache path")
+        return Path(str(rel).strip())
+
+    def _load_mask3d_dino_sample(self, ref, scan_id: str) -> dict | None:
+        if self.mask3d_dino_sample_cache_root is None:
+            return None
+        raw_path = self._sample_cache_relpath_from_row(ref, scan_id)
+        path = raw_path if raw_path.is_absolute() else self.mask3d_dino_sample_cache_root / raw_path
+        if not path.is_file():
+            raise FileNotFoundError(f"sample-level Mask3D-DINO cache not found for scene {scan_id}: {path}")
+        full = torch.load(path, map_location="cpu")
+        if not isinstance(full, dict):
+            raise RuntimeError(f"sample-level Mask3D-DINO cache must be a dict: {path}")
+        if "proposal_dino_features" not in full:
+            raise RuntimeError(f"Mask3D-DINO cache missing proposal_dino_features: {path}")
+        full["_sample_cache_path"] = str(path)
+        return full
 
     def _get_mask3d_pred_name(self, scan_id: str, inst_id: int, fallback: str) -> str:
         mode = str(os.environ.get("VIGOR_MASK3D_PRED_NAME_MODE", "gt")).strip().lower()
@@ -237,6 +272,7 @@ class ListeningDataset(Dataset):
         res = dict()
         scan, target, tokens, is_nr3d, scan_id, LLM_info = self.get_reference_data(index)
         ref = self.references.loc[index]
+        dino_feat = self._load_mask3d_dino_sample(ref, scan_id) if self.mask3d_dino_sample_cache_root is not None else None
         # Optional: multi-target GT set (M3DRef). Stored as a stringified list in CSV.
         target_ids = None
         try:
@@ -414,6 +450,52 @@ class ListeningDataset(Dataset):
         # 若指定了 Mask3D 预提取特征目录，记录该 scene 的特征路径。
         if self.mask3d_feature_root:
             res['mask3d_feature_path'] = str(self.mask3d_feature_root / f"{scan_id}.pt")
+        if dino_feat is not None:
+            dino_src = torch.as_tensor(dino_feat["proposal_dino_features"], dtype=torch.float32)
+            if dino_src.ndim != 2:
+                raise RuntimeError(
+                    f"proposal_dino_features must be [Q,D], got {tuple(dino_src.shape)} "
+                    f"from {dino_feat.get('_sample_cache_path')}"
+                )
+            dino_valid_src = dino_feat.get("proposal_dino_valid_mask")
+            if dino_valid_src is None:
+                dino_valid_src = torch.ones((dino_src.shape[0],), dtype=torch.bool)
+            else:
+                dino_valid_src = torch.as_tensor(dino_valid_src, dtype=torch.bool)
+            if dino_valid_src.ndim != 1 or int(dino_valid_src.shape[0]) != int(dino_src.shape[0]):
+                raise RuntimeError(
+                    f"proposal_dino_valid_mask must be [Q], got {tuple(dino_valid_src.shape)} "
+                    f"for features {tuple(dino_src.shape)}"
+                )
+            raw_map = dino_feat.get("gt_to_query_map", None)
+            if raw_map is None:
+                base_feat = self._load_mask3d_scene(scan_id)
+                if not isinstance(base_feat, dict):
+                    raise RuntimeError(f"Mask3D-DINO alignment requires gt_to_query_map for scene {scan_id}")
+                raw_map = base_feat.get("gt_to_query_map", None)
+            gt_map = self._normalize_query_map(raw_map, str(dino_feat.get("_sample_cache_path", scan_id)))
+            if not gt_map:
+                raise RuntimeError(f"Mask3D-DINO alignment got empty gt_to_query_map for scene {scan_id}")
+            aligned_dino = torch.zeros((self.max_context_size, dino_src.shape[-1]), dtype=torch.float32)
+            aligned_dino_valid = torch.zeros((self.max_context_size,), dtype=torch.bool)
+            for j, o in enumerate(context):
+                if j >= self.max_context_size:
+                    break
+                qidx = gt_map.get(int(o.object_id), None)
+                if qidx is None:
+                    continue
+                if not (0 <= int(qidx) < int(dino_src.shape[0])):
+                    raise IndexError(
+                        f"Mask3D-DINO qidx out of range for scene={scan_id} "
+                        f"object_id={int(o.object_id)} qidx={int(qidx)} Q={int(dino_src.shape[0])}"
+                    )
+                if bool(dino_valid_src[int(qidx)].item()):
+                    aligned_dino[j] = dino_src[int(qidx)]
+                    aligned_dino_valid[j] = True
+            if not bool(aligned_dino_valid.any().item()):
+                raise RuntimeError(f"Mask3D-DINO did not align to any context object for scene {scan_id}")
+            res['mask3d_dino_features'] = aligned_dino
+            res['mask3d_dino_valid_mask'] = aligned_dino_valid
         res['center_coors'] = box_info_center
         res['corner_coors'] = box_corners
         if self.object_transformation is not None:

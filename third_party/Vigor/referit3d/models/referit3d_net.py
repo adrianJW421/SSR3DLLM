@@ -126,6 +126,22 @@ class ReferIt3DNet_transformer(nn.Module):
             nn.LayerNorm(self.inner_dim),
         )
 
+        self.use_mask3d_dino_features = str(
+            os.environ.get(
+                "VIGOR_MASK3D_DINO_ENABLE",
+                "1" if str(os.environ.get("VIGOR_MASK3D_DINO_SAMPLE_CACHE_ROOT", "")).strip() else "0",
+            )
+        ).strip().lower() in {"1", "true", "yes", "y", "on"}
+        self.mask3d_dino_alpha = float(str(os.environ.get("VIGOR_MASK3D_DINO_ALPHA", "1.0")).strip())
+        self.mask3d_dino_feature_dim = int(str(os.environ.get("VIGOR_MASK3D_DINO_FEATURE_DIM", "1024")).strip())
+        if self.use_mask3d_dino_features:
+            self.mask3d_dino_feature_mapping = nn.Sequential(
+                nn.Linear(self.mask3d_dino_feature_dim, self.inner_dim),
+                nn.LayerNorm(self.inner_dim),
+            )
+        else:
+            self.mask3d_dino_feature_mapping = None
+
         self.class_name_tokens = class_name_tokens
 
         self.lang_multilabel = args.lang_multilabel
@@ -342,6 +358,38 @@ class ReferIt3DNet_transformer(nn.Module):
             pass
         return oq
 
+    def _encode_mask3d_dino_features(self, batch: dict) -> torch.Tensor | None:
+        if not self.use_mask3d_dino_features:
+            return None
+        if "mask3d_dino_features" not in batch:
+            raise RuntimeError("VIGOR_MASK3D_DINO_ENABLE=1 requires batch['mask3d_dino_features']")
+        dino = batch["mask3d_dino_features"]
+        if not torch.is_tensor(dino):
+            raise TypeError(f"mask3d_dino_features must be a Tensor [B,N,D], got {type(dino)}")
+        dino = dino.to(self.device, dtype=torch.float32)
+        if dino.dim() != 3:
+            raise RuntimeError(f"mask3d_dino_features must be [B,N,D], got {tuple(dino.shape)}")
+        if int(dino.shape[-1]) != int(self.mask3d_dino_feature_dim):
+            raise RuntimeError(
+                f"mask3d_dino_features dim mismatch: got D={int(dino.shape[-1])} "
+                f"expected D={int(self.mask3d_dino_feature_dim)}"
+            )
+        valid = batch.get("mask3d_dino_valid_mask", None)
+        if valid is None:
+            valid = torch.ones(dino.shape[:2], device=self.device, dtype=torch.bool)
+        else:
+            if not torch.is_tensor(valid):
+                raise TypeError(f"mask3d_dino_valid_mask must be a Tensor [B,N], got {type(valid)}")
+            valid = valid.to(self.device, dtype=torch.bool)
+        if valid.dim() != 2 or int(valid.shape[0]) != int(dino.shape[0]) or int(valid.shape[1]) != int(dino.shape[1]):
+            raise RuntimeError(
+                f"mask3d_dino_valid_mask must be [B,N] aligned with features, "
+                f"got mask={tuple(valid.shape)} feats={tuple(dino.shape)}"
+            )
+        dino = F.normalize(dino, dim=-1)
+        dino_infos = self.mask3d_dino_feature_mapping(dino)
+        return dino_infos * valid.to(dtype=dino_infos.dtype).unsqueeze(-1)
+
     @torch.no_grad()
     def aug_input(self, input_points, box_infos):
         input_points = input_points.float().to(self.device)
@@ -471,6 +519,7 @@ class ReferIt3DNet_transformer(nn.Module):
             and ("mask3d_object_queries" in batch)
             and (batch.get("mask3d_object_queries", None) is not None)
         )
+        dino_infos = self._encode_mask3d_dino_features(batch)
 
         # obj_encoding
         scannet_labels = None
@@ -535,6 +584,19 @@ class ReferIt3DNet_transformer(nn.Module):
         if len(obj_infos.shape) == 3:
             assert self.view_number == 1
             obj_infos = obj_infos.unsqueeze(1).repeat(1, self.view_number, 1, 1)
+        if dino_infos is not None:
+            if (
+                int(dino_infos.shape[0]) != int(obj_infos.shape[0])
+                or int(dino_infos.shape[1]) != int(obj_infos.shape[2])
+                or int(dino_infos.shape[2]) != int(obj_infos.shape[3])
+            ):
+                raise RuntimeError(
+                    f"mask3d_dino_features must align with obj_infos, got "
+                    f"dino={tuple(dino_infos.shape)} obj_infos={tuple(obj_infos.shape)}"
+                )
+            obj_infos = obj_infos + float(self.mask3d_dino_alpha) * dino_infos[:, None].repeat(
+                1, self.view_number, 1, 1
+            )
         ## language_encoding
         # Option A (default): encode `lang_tokens` with BERT (Vigor original).
         # Option B: directly provide precomputed `lang_embeds` to bypass BERT,

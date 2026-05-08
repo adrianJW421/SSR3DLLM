@@ -27,10 +27,20 @@ Note: this is a private review link and may have an expiry date.
 | `data/LISTENER_INIT_CKPT_BERT/best_model.pth` | Listener init ckpt for ReferIt3D suite | 1.1 GB |
 | `data/NR3D_TRAIN_CSV/` | NR3D train/test CSV pair used by release scripts | 0.1 GB |
 | `data/SR3D_TRAIN_CSV/` | SR3D train/test CSV pair used by release scripts | 0.1 GB |
+| `data/SCANREFER_TRAIN_CSV/` | ScanRefer train/test CSV pair in Vigor-style chain format | varies |
+| `data/MULTI3DREF_TRAIN_CSV/` | Multi3DRef train/test CSV pair in Vigor-style chain format | varies |
 | `data/MASK3D_FEATS_TRAIN` (zip) | Pre-exported train feature shards | 0.07 GB |
 | `data/MASK3D_FEATS_TEST` (zip) | Pre-exported validation/test feature shards | 0.02 GB |
+| `data/SCANREFER_MASK3D_FEATS_TRAIN` (zip) | ScanRefer train proposal-level feature shards | varies |
+| `data/SCANREFER_MASK3D_FEATS_TEST` (zip) | ScanRefer validation/test proposal-level feature shards | varies |
+| `data/MULTI3DREF_MASK3D_FEATS_TRAIN` (zip) | Multi3DRef train proposal-level feature shards | varies |
+| `data/MULTI3DREF_MASK3D_FEATS_TEST` (zip) | Multi3DRef validation/test proposal-level feature shards | varies |
+| `SCANREFER_DINO_SAMPLE_CACHE_ROOT` | Optional ScanRefer DINO sample-cache root set in `configs/paths.sh` | varies |
+| `MULTI3DREF_DINO_SAMPLE_CACHE_ROOT` | Optional Multi3DRef DINO sample-cache root set in `configs/paths.sh` | varies |
 | `data/MASK3D_FEATS_TRAIN_predbox_qnorm` (zip) | Optional qnorm train feature variant | 0.13 GB |
 | `data/MASK3D_FEATS_TEST_predbox_qnorm` (zip) | Optional qnorm validation/test feature variant | 0.03 GB |
+| `data/SCANREFER_LLAMA_STEPSLOT_EVAL_CKPT/best_model.pth` | SSR3D-LLM ScanRefer evaluation checkpoint | varies |
+| `data/MULTI3DREF_LLAMA_STEPSLOT_EVAL_CKPT/best_model.pth` | SSR3D-LLM Multi3DRef evaluation checkpoint | varies |
 
 ## B. Download from Official Sources
 
@@ -66,6 +76,11 @@ If you use the four feature zip files from the Figshare bundle, extract them to:
 
 - `data/MASK3D_FEATS_TRAIN/`
 - `data/MASK3D_FEATS_TEST/`
+- `data/SCANREFER_MASK3D_FEATS_TRAIN/`
+- `data/SCANREFER_MASK3D_FEATS_TEST/`
+- `data/MULTI3DREF_MASK3D_FEATS_TRAIN/`
+- `data/MULTI3DREF_MASK3D_FEATS_TEST/`
+- optional DINO sample-cache roots pointed to by `SCANREFER_DINO_SAMPLE_CACHE_ROOT` and `MULTI3DREF_DINO_SAMPLE_CACHE_ROOT`
 - `data/MASK3D_FEATS_TRAIN_predbox_qnorm/` (optional)
 - `data/MASK3D_FEATS_TEST_predbox_qnorm/` (optional)
 
@@ -88,6 +103,8 @@ After extraction, make sure `configs/paths.sh` points to the extracted directori
 |---|---|
 | `data/LLAMA_STEPSLOT_EVAL_CKPT/` | Optional extra eval profile |
 | `data/LLAMA_STEPSLOT_EVAL_CKPT_UB/` | Optional UB profile |
+| `data/SCANREFER_LLAMA_STEPSLOT_EVAL_CKPT/` | ScanRefer SSR3D-LLM evaluation profile |
+| `data/MULTI3DREF_LLAMA_STEPSLOT_EVAL_CKPT/` | Multi3DRef SSR3D-LLM evaluation profile |
 | `data/MASK3D_FEATS_TRAIN_predbox_qnorm/`, `data/MASK3D_FEATS_TEST_predbox_qnorm/` | Optional qnorm ablation assets (also included as zip in the bundle) |
 | `data/langdata/` | Optional local language payloads for custom experiments |
 | `data/processed/` | Legacy compatibility path only |

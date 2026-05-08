@@ -44,17 +44,29 @@ export STEP2_CKPT="${STEP2_CKPT:-${REPO_ROOT}/data/grounded3dllm_ckpts/step2/las
 # NOTE: the public release does not ship these CSVs; download/build them and point to the files here.
 export NR3D_TRAIN_CSV="${NR3D_TRAIN_CSV:-${REPO_ROOT}/data/NR3D_TRAIN_CSV/nr3d_train_LLM_step4_485.csv}"
 export SR3D_TRAIN_CSV="${SR3D_TRAIN_CSV:-${REPO_ROOT}/data/SR3D_TRAIN_CSV/sr3d_train_LLM_step4_485.csv}"
+export SCANREFER_TRAIN_CSV="${SCANREFER_TRAIN_CSV:-${REPO_ROOT}/data/SCANREFER_TRAIN_CSV/scanrefer_train_vigor_chain.csv}"
+export MULTI3DREF_TRAIN_CSV="${MULTI3DREF_TRAIN_CSV:-${REPO_ROOT}/data/MULTI3DREF_TRAIN_CSV/multi3dref_train_vigor_chain.csv}"
 
 # Pre-exported per-scene Mask3D features for ReferIt3D listener teacher training/eval (ViGOR-based).
 export MASK3D_FEATS_TRAIN="${MASK3D_FEATS_TRAIN:-${REPO_ROOT}/data/MASK3D_FEATS_TRAIN}"
 export MASK3D_FEATS_TEST="${MASK3D_FEATS_TEST:-${REPO_ROOT}/data/MASK3D_FEATS_TEST}"
+export SCANREFER_MASK3D_FEATS_TRAIN="${SCANREFER_MASK3D_FEATS_TRAIN:-${REPO_ROOT}/data/SCANREFER_MASK3D_FEATS_TRAIN}"
+export SCANREFER_MASK3D_FEATS_TEST="${SCANREFER_MASK3D_FEATS_TEST:-${REPO_ROOT}/data/SCANREFER_MASK3D_FEATS_TEST}"
+export MULTI3DREF_MASK3D_FEATS_TRAIN="${MULTI3DREF_MASK3D_FEATS_TRAIN:-${REPO_ROOT}/data/MULTI3DREF_MASK3D_FEATS_TRAIN}"
+export MULTI3DREF_MASK3D_FEATS_TEST="${MULTI3DREF_MASK3D_FEATS_TEST:-${REPO_ROOT}/data/MULTI3DREF_MASK3D_FEATS_TEST}"
 export FEAT_DIM="${FEAT_DIM:-128}"
+export SCANREFER_DINO_SAMPLE_CACHE_ROOT="${SCANREFER_DINO_SAMPLE_CACHE_ROOT:-}"
+export MULTI3DREF_DINO_SAMPLE_CACHE_ROOT="${MULTI3DREF_DINO_SAMPLE_CACHE_ROOT:-}"
+export DINO_ALPHA="${DINO_ALPHA:-2.0}"
+export DINO_FEATURE_DIM="${DINO_FEATURE_DIM:-1024}"
 
 # Frozen listener-teacher init checkpoint (trained via customized `third_party/Vigor`).
 export LISTENER_INIT_CKPT_BERT="${LISTENER_INIT_CKPT_BERT:-${REPO_ROOT}/data/LISTENER_INIT_CKPT_BERT/best_model.pth}"
 
 # Optional: stageC-pred checkpoint for direct evaluation without re-training.
 export LLAMA_STEPSLOT_EVAL_CKPT="${LLAMA_STEPSLOT_EVAL_CKPT:-${REPO_ROOT}/data/LLAMA_STEPSLOT_EVAL_CKPT/llama_stepslot_onepass_varlen_mask_stageC_pred_latest_best.pth}"
+export SCANREFER_LLAMA_STEPSLOT_EVAL_CKPT="${SCANREFER_LLAMA_STEPSLOT_EVAL_CKPT:-${REPO_ROOT}/data/SCANREFER_LLAMA_STEPSLOT_EVAL_CKPT/best_model.pth}"
+export MULTI3DREF_LLAMA_STEPSLOT_EVAL_CKPT="${MULTI3DREF_LLAMA_STEPSLOT_EVAL_CKPT:-${REPO_ROOT}/data/MULTI3DREF_LLAMA_STEPSLOT_EVAL_CKPT/best_model.pth}"
 
 # Optional: UB listener checkpoint (single release directory).
 export LLAMA_STEPSLOT_EVAL_CKPT_UB="${LLAMA_STEPSLOT_EVAL_CKPT_UB:-${REPO_ROOT}/data/LLAMA_STEPSLOT_EVAL_CKPT_UB/best_model.pth}"

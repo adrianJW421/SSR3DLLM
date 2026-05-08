@@ -12,6 +12,8 @@ These aliases call the original scripts internally, so old commands still work.
 | Unified eval/ask entry | `scripts/run_eval_unified.sh` | `scripts/eval_ssr3dllm_unified.sh` |
 | Eval step-slot varlen chain | `scripts/run_eval_stepslot_varlen.sh` | `scripts/eval_llama_stepslot_varlen_chain_onepass_pred.sh` |
 | Eval ReferIt3D suite | `scripts/run_eval_referit3d_suite.sh` | `scripts/eval_llama_stepslot_referit3d_suite.sh` |
+| Eval ScanRefer/Multi3DRef | `scripts/run_eval_scanrefer_multi3dref.sh` | `scripts/eval_ssr3dllm_scanrefer_multi3dref.sh` |
+| Benchmark SSR3D-LLM readout | `scripts/run_benchmark_readout.sh` | `scripts/benchmark_ssr3dllm_readout.sh` |
 | Export Mask3D features | `scripts/run_export_mask3d_features.sh` | `scripts/export_mask3d_feats_predbox_fullresfix.sh` |
 
 ## Compatibility

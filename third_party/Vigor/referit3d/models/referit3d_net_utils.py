@@ -192,6 +192,15 @@ def make_batch_keys(args, extras=None):
     if args.lang_cls_alpha > 0:
         batch_keys.append('target_class')
 
+    dino_enabled = str(
+        os.environ.get(
+            "VIGOR_MASK3D_DINO_ENABLE",
+            "1" if str(os.environ.get("VIGOR_MASK3D_DINO_SAMPLE_CACHE_ROOT", "")).strip() else "0",
+        )
+    ).strip().lower() in {"1", "true", "yes", "y", "on"}
+    if dino_enabled:
+        batch_keys += ["mask3d_dino_features", "mask3d_dino_valid_mask"]
+
     return batch_keys
 
 

@@ -48,6 +48,11 @@ them under `<repo-root>/data/` and keep directory names unchanged:
 
 - `MASK3D_FEATS_TRAIN/`
 - `MASK3D_FEATS_TEST/`
+- `SCANREFER_MASK3D_FEATS_TRAIN/`
+- `SCANREFER_MASK3D_FEATS_TEST/`
+- `MULTI3DREF_MASK3D_FEATS_TRAIN/`
+- `MULTI3DREF_MASK3D_FEATS_TEST/`
+- optional DINO sample caches via `SCANREFER_DINO_SAMPLE_CACHE_ROOT` and `MULTI3DREF_DINO_SAMPLE_CACHE_ROOT`
 - `MASK3D_FEATS_TRAIN_predbox_qnorm/` (optional)
 - `MASK3D_FEATS_TEST_predbox_qnorm/` (optional)
 
