@@ -6,7 +6,7 @@ This repository is the anonymous release package for SSR3D-LLM.
 It provides runnable evaluation/demo scripts, release configs, documentation, and asset pointers for reproducing the paper's main evaluation workflows.
 
 <figure align="center">
-  <img src="docs/figs/paper/teaser_new.png" alt="QPG vs. S3G teaser" width="100%"/>
+  <img src="docs/figs/paper/teaser_release_20260507.png" alt="QPG vs. S3G teaser" width="100%"/>
   <figcaption>
     <strong>Figure 1: QPG vs. S3G.</strong>
     Fine-grained 3D grounding often requires ruling out candidates through context objects and spatial relations.
@@ -28,7 +28,7 @@ Across ReferIt3D, ScanRefer, and Multi3DRef, SSR3D-LLM achieves the strongest re
 ## Method Overview
 
 <p align="center">
-  <img src="docs/figs/paper/framework_v2.png" alt="SSR3D-LLM framework" width="100%"/>
+  <img src="docs/figs/paper/framework_release_20260505.png" alt="SSR3D-LLM framework" width="100%"/>
 </p>
 
 SSR3D-LLM keeps the unified 3D-LLM backbone and the Mask3D-based candidate pipeline, but replaces the single QPG pointer with a structured grounding route.
