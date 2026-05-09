@@ -119,10 +119,10 @@ The qualitative trace illustrates how S3G separates competing same-class candida
 - Not committed to git: raw datasets, base LLM/BERT weights, and large checkpoints.
 - Third-party datasets and pretrained models should be obtained from their official sources and used under their own licenses/terms.
 
-Figshare release bundle for project-owned assets:
+Anonymous review bundle link for project-owned assets:
 
 ```text
-https://doi.org/10.6084/m9.figshare.31386127
+https://figshare.com/s/b4f92c34ceda0b17626d
 ```
 
 ## Repository Usage
