@@ -15,6 +15,7 @@ These aliases call the original scripts internally, so old commands still work.
 | Eval ScanRefer/Multi3DRef | `scripts/run_eval_scanrefer_multi3dref.sh` | `scripts/eval_ssr3dllm_scanrefer_multi3dref.sh` |
 | Benchmark SSR3D-LLM readout | `scripts/run_benchmark_readout.sh` | `scripts/benchmark_ssr3dllm_readout.sh` |
 | Export Mask3D features | `scripts/run_export_mask3d_features.sh` | `scripts/export_mask3d_feats_predbox_fullresfix.sh` |
+| Build optional DINO sidecar cache | `scripts/run_build_dino_sidecar_cache.sh` | `scripts/build_dino_sidecar_cache.sh` |
 
 ## Compatibility
 

@@ -198,14 +198,19 @@ gt_to_query_map: dict mapping ScanNet object id to proposal row
 To reproduce the DINO cache locally:
 
 ```bash
-# 1. Prepare official ScanNet RGB-D frames, camera poses, and axis-aligned scans.
-# 2. Generate or download Mask3D/CLASP query-conditioned proposal caches for the target CSV split.
-# 3. Run a DINOv2 multi-view feature extractor over ScanNet posed RGB frames.
-# 4. For each query sample, match its Mask3D proposal boxes/masks to the DINO multi-view object features.
-# 5. Save the sidecar files with the schema above and the same relative paths used by the CSV.
+export DATASET=scanrefer
+export SCANREFER_QCOND_CACHE_ROOT=/path/to/scanrefer_query_conditioned_mask3d_cache
+export SCANREFER_DINO_SAMPLE_CACHE_ROOT=/path/to/scanrefer_dino_sidecars
+export DINO_SOURCE_FEATURES=/path/to/scannet_dinov2_multiview_object_features.pt
+export DINO_SOURCE_ATTRIBUTES=/path/to/scannet_mask3d_object_attributes.pt
+bash scripts/run_build_dino_sidecar_cache.sh
 ```
 
-Then set:
+For Multi3DRef, set `DATASET=multi3dref`, `MULTI3DREF_QCOND_CACHE_ROOT`, and `MULTI3DREF_DINO_SAMPLE_CACHE_ROOT`. `DINO_SOURCE_FEATURES` and `DINO_SOURCE_ATTRIBUTES` may contain multiple `:`-separated files if the source features are sharded.
+
+`DINO_SOURCE_FEATURES` is a PyTorch dictionary of multi-view DINOv2 object features keyed as `scene_id_objectid`, for example `scene0000_00_03`. `DINO_SOURCE_ATTRIBUTES` is a PyTorch dictionary keyed by `scene_id`; each value should contain `locs` as `[num_objects, 6]` center-size boxes and optionally `obj_ids`.
+
+After the sidecar cache is built, set:
 
 ```bash
 export SCANREFER_DINO_SAMPLE_CACHE_ROOT=/path/to/scanrefer_dino_sidecars

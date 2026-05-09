@@ -47,7 +47,20 @@ to your exported directories.
 
 DINO appearance sidecar caches are not hosted in the anonymous Figshare bundle because of storage limits. They are optional. If `SCANREFER_DINO_SAMPLE_CACHE_ROOT` and `MULTI3DREF_DINO_SAMPLE_CACHE_ROOT` are unset, scripts run without DINO fusion.
 
-To regenerate them, prepare official ScanNet RGB-D frames and camera poses, build the same Mask3D/CLASP proposal cache used by the evaluation CSV, run a DINOv2 multi-view object-feature extractor, and save one sidecar `.pt` per query sample. The sidecar root should mirror the CSV `mask3d_sample_cache_relpath` or `mask3d_sample_cache_path` values.
+To regenerate them, prepare DINOv2 multi-view object features from official ScanNet RGB-D frames and camera poses, and use the same Mask3D/CLASP proposal cache referenced by the evaluation CSV. Then run:
+
+```bash
+export DATASET=scanrefer
+export SCANREFER_QCOND_CACHE_ROOT=/path/to/scanrefer_query_conditioned_mask3d_cache
+export SCANREFER_DINO_SAMPLE_CACHE_ROOT=/path/to/scanrefer_dino_sidecars
+export DINO_SOURCE_FEATURES=/path/to/scannet_dinov2_multiview_object_features.pt
+export DINO_SOURCE_ATTRIBUTES=/path/to/scannet_mask3d_object_attributes.pt
+bash scripts/run_build_dino_sidecar_cache.sh
+```
+
+For Multi3DRef, set `DATASET=multi3dref`, `MULTI3DREF_QCOND_CACHE_ROOT`, and `MULTI3DREF_DINO_SAMPLE_CACHE_ROOT`. The sidecar root mirrors the CSV `mask3d_sample_cache_relpath` or `mask3d_sample_cache_path` values.
+
+`DINO_SOURCE_FEATURES` should be a PyTorch dictionary of multi-view DINOv2 object features keyed as `scene_id_objectid`, for example `scene0000_00_03`. `DINO_SOURCE_ATTRIBUTES` should be a PyTorch dictionary keyed by `scene_id`; each value should contain `locs` as `[num_objects, 6]` center-size boxes and optionally `obj_ids`.
 
 Each sidecar `.pt` should contain:
 

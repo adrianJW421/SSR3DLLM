@@ -72,7 +72,20 @@ Then set in `configs/paths.sh`:
 
 The DINO sidecar cache is not hosted in the anonymous Figshare bundle because the bundle has a 20GB storage limit. It is optional: if `SCANREFER_DINO_SAMPLE_CACHE_ROOT` and `MULTI3DREF_DINO_SAMPLE_CACHE_ROOT` are unset, the evaluation scripts disable DINO fusion.
 
-To rebuild it locally, use the official ScanNet RGB-D frames and camera poses, the same Mask3D/CLASP proposal cache referenced by the evaluation CSV, and a DINOv2 multi-view object-feature extractor. Save one `.pt` file per query sample with the same relative path stored in `mask3d_sample_cache_relpath` or `mask3d_sample_cache_path`.
+To rebuild it locally, use the same Mask3D/CLASP proposal cache referenced by the evaluation CSV and DINOv2 multi-view object features generated from official ScanNet RGB-D frames and camera poses. Then run:
+
+```bash
+export DATASET=scanrefer
+export SCANREFER_QCOND_CACHE_ROOT=/path/to/scanrefer_query_conditioned_mask3d_cache
+export SCANREFER_DINO_SAMPLE_CACHE_ROOT=/path/to/scanrefer_dino_sidecars
+export DINO_SOURCE_FEATURES=/path/to/scannet_dinov2_multiview_object_features.pt
+export DINO_SOURCE_ATTRIBUTES=/path/to/scannet_mask3d_object_attributes.pt
+bash scripts/run_build_dino_sidecar_cache.sh
+```
+
+For Multi3DRef, set `DATASET=multi3dref`, `MULTI3DREF_QCOND_CACHE_ROOT`, and `MULTI3DREF_DINO_SAMPLE_CACHE_ROOT`. The script saves one `.pt` file per query sample with the same relative path stored in `mask3d_sample_cache_relpath` or `mask3d_sample_cache_path`.
+
+`DINO_SOURCE_FEATURES` should be a PyTorch dictionary of multi-view DINOv2 object features keyed as `scene_id_objectid`, for example `scene0000_00_03`. `DINO_SOURCE_ATTRIBUTES` should be a PyTorch dictionary keyed by `scene_id`; each value should contain `locs` as `[num_objects, 6]` center-size boxes and optionally `obj_ids`.
 
 Expected `.pt` schema:
 
