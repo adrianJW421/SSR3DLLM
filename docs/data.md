@@ -43,6 +43,25 @@ bash scripts/run_export_mask3d_features.sh train
 Then point `MASK3D_FEATS_TEST` and `MASK3D_FEATS_TRAIN` in `configs/paths.sh`
 to your exported directories.
 
+## 4) Optional DINO sidecar cache
+
+DINO appearance sidecar caches are not hosted in the anonymous Figshare bundle because of storage limits. They are optional. If `SCANREFER_DINO_SAMPLE_CACHE_ROOT` and `MULTI3DREF_DINO_SAMPLE_CACHE_ROOT` are unset, scripts run without DINO fusion.
+
+To regenerate them, prepare official ScanNet RGB-D frames and camera poses, build the same Mask3D/CLASP proposal cache used by the evaluation CSV, run a DINOv2 multi-view object-feature extractor, and save one sidecar `.pt` per query sample. The sidecar root should mirror the CSV `mask3d_sample_cache_relpath` or `mask3d_sample_cache_path` values.
+
+Each sidecar `.pt` should contain:
+
+- `proposal_dino_features`: `FloatTensor [num_proposals, 1024]`
+- `proposal_dino_valid_mask`: `BoolTensor [num_proposals]`
+- `gt_to_query_map`: dict mapping ScanNet object id to proposal row
+
+Set these paths in `configs/paths.sh`:
+
+- `SCANREFER_DINO_SAMPLE_CACHE_ROOT`
+- `MULTI3DREF_DINO_SAMPLE_CACHE_ROOT`
+- `DINO_FEATURE_DIM=1024`
+- `DINO_ALPHA=2.0`
+
 If you use the zipped feature assets from Figshare instead of local export, extract
 them under `<repo-root>/data/` and keep directory names unchanged:
 
@@ -52,11 +71,10 @@ them under `<repo-root>/data/` and keep directory names unchanged:
 - `SCANREFER_MASK3D_FEATS_TEST/`
 - `MULTI3DREF_MASK3D_FEATS_TRAIN/`
 - `MULTI3DREF_MASK3D_FEATS_TEST/`
-- optional DINO sample caches via `SCANREFER_DINO_SAMPLE_CACHE_ROOT` and `MULTI3DREF_DINO_SAMPLE_CACHE_ROOT`
 - `MASK3D_FEATS_TRAIN_predbox_qnorm/` (optional)
 - `MASK3D_FEATS_TEST_predbox_qnorm/` (optional)
 
-## 4) Release recommendation
+## 5) Release recommendation
 
 Before tagging a public release:
 - keep `data/` as placeholders only

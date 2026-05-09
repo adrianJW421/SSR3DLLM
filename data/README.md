@@ -35,8 +35,6 @@ Note: this is a private review link and may have an expiry date.
 | `data/SCANREFER_MASK3D_FEATS_TEST` (zip) | ScanRefer validation/test proposal-level feature shards | varies |
 | `data/MULTI3DREF_MASK3D_FEATS_TRAIN` (zip) | Multi3DRef train proposal-level feature shards | varies |
 | `data/MULTI3DREF_MASK3D_FEATS_TEST` (zip) | Multi3DRef validation/test proposal-level feature shards | varies |
-| `SCANREFER_DINO_SAMPLE_CACHE_ROOT` | Optional ScanRefer DINO sample-cache root set in `configs/paths.sh` | varies |
-| `MULTI3DREF_DINO_SAMPLE_CACHE_ROOT` | Optional Multi3DRef DINO sample-cache root set in `configs/paths.sh` | varies |
 | `data/MASK3D_FEATS_TRAIN_predbox_qnorm` (zip) | Optional qnorm train feature variant | 0.13 GB |
 | `data/MASK3D_FEATS_TEST_predbox_qnorm` (zip) | Optional qnorm validation/test feature variant | 0.03 GB |
 | `data/SCANREFER_LLAMA_STEPSLOT_EVAL_CKPT/best_model.pth` | SSR3D-LLM ScanRefer evaluation checkpoint | varies |
@@ -70,7 +68,28 @@ Then set in `configs/paths.sh`:
 - `MASK3D_FEATS_TEST=<your validation export dir>`
 - `MASK3D_FEATS_TRAIN=<your train export dir>`
 
-## D. If You Download Feature ZIPs: Expected Extraction Paths
+## D. Optional DINO Appearance Sidecar Cache
+
+The DINO sidecar cache is not hosted in the anonymous Figshare bundle because the bundle has a 20GB storage limit. It is optional: if `SCANREFER_DINO_SAMPLE_CACHE_ROOT` and `MULTI3DREF_DINO_SAMPLE_CACHE_ROOT` are unset, the evaluation scripts disable DINO fusion.
+
+To rebuild it locally, use the official ScanNet RGB-D frames and camera poses, the same Mask3D/CLASP proposal cache referenced by the evaluation CSV, and a DINOv2 multi-view object-feature extractor. Save one `.pt` file per query sample with the same relative path stored in `mask3d_sample_cache_relpath` or `mask3d_sample_cache_path`.
+
+Expected `.pt` schema:
+
+| Key | Shape / type |
+|---|---|
+| `proposal_dino_features` | `FloatTensor [num_proposals, 1024]` |
+| `proposal_dino_valid_mask` | `BoolTensor [num_proposals]` |
+| `gt_to_query_map` | dict mapping ScanNet object id to proposal row |
+
+Then set in `configs/paths.sh`:
+
+- `SCANREFER_DINO_SAMPLE_CACHE_ROOT=<your ScanRefer DINO sidecar root>`
+- `MULTI3DREF_DINO_SAMPLE_CACHE_ROOT=<your Multi3DRef DINO sidecar root>`
+- `DINO_FEATURE_DIM=1024`
+- `DINO_ALPHA=2.0`
+
+## E. If You Download Feature ZIPs: Expected Extraction Paths
 
 If you use the four feature zip files from the Figshare bundle, extract them to:
 
@@ -80,7 +99,6 @@ If you use the four feature zip files from the Figshare bundle, extract them to:
 - `data/SCANREFER_MASK3D_FEATS_TEST/`
 - `data/MULTI3DREF_MASK3D_FEATS_TRAIN/`
 - `data/MULTI3DREF_MASK3D_FEATS_TEST/`
-- optional DINO sample-cache roots pointed to by `SCANREFER_DINO_SAMPLE_CACHE_ROOT` and `MULTI3DREF_DINO_SAMPLE_CACHE_ROOT`
 - `data/MASK3D_FEATS_TRAIN_predbox_qnorm/` (optional)
 - `data/MASK3D_FEATS_TEST_predbox_qnorm/` (optional)
 

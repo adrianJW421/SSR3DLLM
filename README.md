@@ -183,6 +183,39 @@ bash scripts/run_export_mask3d_features.sh validation
 bash scripts/run_export_mask3d_features.sh train
 ```
 
+#### 4) Optional: regenerate DINO appearance sidecar features
+
+The DINO appearance sidecar caches are not included in the anonymous Figshare bundle because the bundle has a 20GB storage limit. They can be regenerated from ScanNet RGB-D frames and the same Mask3D proposal cache used by the evaluation CSVs.
+
+The released evaluator expects one DINO sidecar `.pt` per query sample. Each CSV row should contain `mask3d_sample_cache_relpath` or `mask3d_sample_cache_path`, and the DINO sidecar root should mirror those relative paths. Each sidecar file must be a PyTorch dictionary with:
+
+```text
+proposal_dino_features: FloatTensor [num_proposals, 1024]
+proposal_dino_valid_mask: BoolTensor [num_proposals]
+gt_to_query_map: dict mapping ScanNet object id to proposal row
+```
+
+To reproduce the DINO cache locally:
+
+```bash
+# 1. Prepare official ScanNet RGB-D frames, camera poses, and axis-aligned scans.
+# 2. Generate or download Mask3D/CLASP query-conditioned proposal caches for the target CSV split.
+# 3. Run a DINOv2 multi-view feature extractor over ScanNet posed RGB frames.
+# 4. For each query sample, match its Mask3D proposal boxes/masks to the DINO multi-view object features.
+# 5. Save the sidecar files with the schema above and the same relative paths used by the CSV.
+```
+
+Then set:
+
+```bash
+export SCANREFER_DINO_SAMPLE_CACHE_ROOT=/path/to/scanrefer_dino_sidecars
+export MULTI3DREF_DINO_SAMPLE_CACHE_ROOT=/path/to/multi3dref_dino_sidecars
+export DINO_FEATURE_DIM=1024
+export DINO_ALPHA=2.0
+```
+
+If these paths are unset, the released scripts run without DINO appearance fusion.
+
 ## Data Policy
 
 This repo does not ship raw datasets or base model weights.
